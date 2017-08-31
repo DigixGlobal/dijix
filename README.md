@@ -140,15 +140,17 @@ A middleware system will provide optional functionality when importing and/or re
 ```javascript
 const dijix = new Dijix({ ipfsEndpoint });
 
-dijix.registerCreators(
-  imageWithThumbnails({
-    thumbnailQuality: 0.5,
-    srcQuality: 0.8,
-    srcSize: 2000,
-    plugins: [ dijix.watermarkPlugin ],
-  }),
-  multiPagePdf(),
-);
+const imageConfig = {
+  thumbnailQuality: 0.5,
+  srcQuality: 0.8,
+  srcSize: 2000,
+  plugins: [ dijix.watermarkPlugin({ watermarkConfig }) ],  
+}
+
+dijix.registerTypes([
+  imageWithThumbnails(imageConfig),
+  multiPagePdf({ imageConfig }), // uses imageWithThumbnails under the hood
+]);
 
 dijix.create('imageWithThumbnails', payload); // returns a promise
   populateHeaders(); // add type, schema, created, data
@@ -159,5 +161,5 @@ dijix.create('imageWithThumbnails', payload); // returns a promise
   // emit `uploaded`
   resolve({ ipfsHash, obj });
 
-dijix.fetch(ipfsHash, { resolveLinks: true }); // returns JSON, resolve links if set to true
+dijix.fetch(ipfsHash, { resolveLinks: true }); // returns promise that resolves JSON and resolve links if set to true
 ```
