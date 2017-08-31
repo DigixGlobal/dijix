@@ -41,6 +41,7 @@ Dijix objects come with standard headers and a type-specific `data` schema. Here
     name: 'An Adorable Kitten',
     fileName: 'kitten.jpg',
     mimeType: 'image/jpeg',
+    exifData: { ... }, // optional field; exif data
     src: 'ipfs://<ipfs hash>',
     width: 2048,
     height: 1024,
@@ -74,6 +75,49 @@ Here's another PoA specific dijix object, which uses linking to provide Proof of
 }
 ```
 
+Some other ideas for dijix objects:
+
+```javascript
+{
+  type: 'multiPagePdf',
+  schema: '0.0.1',
+  created: 1504149884688,
+  encryption: { ... }, // TODO figure something out for encryption; applied individually to all IPFS objects before uploaded
+  data: {
+    name: 'Profit Report 2016',
+    fileName: 'accounting_report.jpg',
+    metadata: { ... }, // optional field; pdf meta data, such as title, author, subject, keywords
+    size: 123123123,
+    src: 'ipfs://<ipfs hash>', // original PDF src
+    mimeType: 'application/pdf'
+    pages: [
+      'ipfs://<ipfs hash>', // links to imageWithThumbnails
+      'ipfs://<ipfs hash>',
+      'ipfs://<ipfs hash>',
+      'ipfs://<ipfs hash>',
+    ]
+  }
+}
+
+{
+  type: 'pinningRegistry',
+  schema: '0.0.1',
+  created: 1504149884688,
+  lastVersion: 'ipfs://<ipfs hash>',
+  data: {
+    description: 'Proof of Asset Attestations (Kovan)',
+    totalSize: 12129389812192387,
+    items: [
+      { src: 'ipfs://<ipfs hash>', created: 1504149884688, size: 123213 },
+      { src: 'ipfs://<ipfs hash>', created: 1504149884688, size: 123213 },
+      { src: 'ipfs://<ipfs hash>', created: 1504149884688, size: 123213 },
+      { src: 'ipfs://<ipfs hash>', created: 1504149884688, size: 123213 },
+      ...
+    ],
+  }
+}
+```
+
 ## Middleware
 
 A middleware system will provide optional functionality when importing and/or reading dijix objects:
@@ -81,7 +125,8 @@ A middleware system will provide optional functionality when importing and/or re
 **Global**
 
 * Encryption & Decryption
-* IPFS Pinning
+* IPFS Pinning / Unpinning
+* Local & Cloud Backups
 
 **Type-specific**
 
