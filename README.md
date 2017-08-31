@@ -103,8 +103,8 @@ Some other ideas for dijix objects:
   type: 'pinningRegistry',
   schema: '0.0.1',
   created: 1504149884688,
-  lastVersion: 'ipfs://<ipfs hash>',
   data: {
+    lastVersion: 'ipfs://<ipfs hash>',
     description: 'Proof of Asset Attestations (Kovan)',
     totalSize: 12129389812192387,
     items: [
@@ -134,3 +134,30 @@ A middleware system will provide optional functionality when importing and/or re
 * Page Splitting
 * Image Conversion / Compression
 * Watermarking
+
+## Architecture Scratchpad
+
+```javascript
+const dijix = new Dijix({ ipfsEndpoint });
+
+dijix.registerCreators(
+  imageWithThumbnails({
+    thumbnailQuality: 0.5,
+    srcQuality: 0.8,
+    srcSize: 2000,
+    plugins: [ dijix.watermarkPlugin ],
+  }),
+  multiPagePdf(),
+);
+
+dijix.create('imageWithThumbnails', payload); // returns a promise
+  populateHeaders(); // add type, schema, created, data
+  // emit `addedHeaders`
+  executeTypePipeline(); // execute the pipeline and plugins. each stage of pipeline emits
+  // emit `transformed`
+  uploadToIpfs(); // resolve, populate src hash
+  // emit `uploaded`
+  resolve({ ipfsHash, obj });
+
+dijix.fetch(ipfsHash, { resolveLinks: true }); // returns JSON, resolve links if set to true
+```
