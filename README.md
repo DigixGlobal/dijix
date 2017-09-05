@@ -152,7 +152,7 @@ dijix.registerTypes([
   multiPagePdf({ imageConfig }), // uses imageWithThumbnails under the hood
 ]);
 
-dijix.create('imageWithThumbnails', payload); // returns a promise
+dijix.create('imageWithThumbnails', { src, watermark: { ... } }); // returns a promise
   populateHeaders(); // add type, schema, created, data
   // emit `addedHeaders`
   executeTypePipeline(); // execute the pipeline and plugins. each stage of pipeline emits

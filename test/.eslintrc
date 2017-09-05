@@ -1,0 +1,10 @@
+{
+  "extends": "eslint-config-airbnb",
+  "env": { "mocha": true },
+  "rules": {
+    "func-names": 0,
+    "prefer-arrow-callback": 0,
+    "max-len": ["warn", 256],
+    "import/no-extraneous-dependencies": 0
+  }
+}

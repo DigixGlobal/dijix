@@ -1,0 +1,30 @@
+{
+  "name": "dijix",
+  "version": "0.0.1",
+  "description": "Digix's IPFS & JSON Immutable & eXtendable File Format Edit",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require babel-polyfill --compilers js:babel-register",
+    "test:watch": "npm run test -- --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.0.3",
+    "eslint-plugin-react": "^7.0.1",
+    "mocha": "^3.5.0"
+  },
+  "dependencies": {
+    "awaiting": "^3.0.0",
+    "ipfs-api": "^14.2.1",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
