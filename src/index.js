@@ -41,24 +41,24 @@ export default class Dijix {
     if (!this.types) { throw new Error('Not initialized!'); }
     const type = this.types[typeName];
     if (!type) { throw new Error(`Type does not exist: ${typeName}`); }
-    // trigger an event!
+    // trigger middleware!
     const headers = this.populateHeaders(typeName);
-    // trigger some middleware!
+    // trigger middleware!
     const data = type.creationPipeline ? await type.creationPipeline(payload, this) : {};
     const dijixObject = { ...headers, data };
-    // trigger some more middleware!
+    // trigger middleware!
     const ipfsHash = await this.ipfs.put(dijixObject);
-    // trigger even more middleware!
+    // trigger middleware!
     return { dijixObject, ipfsHash };
   }
   async fetch(ipfsHash, opts) {
     const { httpEndpoint } = this.config;
     const body = await fetch(`${httpEndpoint}/${ipfsHash}`);
     const json = await body.json();
-    // return the IPFS object
-    // fetch(this.ipfsEndpoint ipfsHash);
-    // TODO determine if it needs to be decrypted...
-    // TODO determine if we should resolve links...
-    return json;
-  };
+    const type = json.type && this.types[json.type];
+    // trigger middleware!
+    const processed = type.fetchPipeline ? await type.fetchPipeline(json, this, opts) : json;
+    // trigger middleware!
+    return processed;
+  }
 }

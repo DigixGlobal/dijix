@@ -1,5 +1,4 @@
 import assert from 'assert';
-import * as a from 'awaiting';
 
 import Dijix, { defaultConfig } from '../src';
 
@@ -8,12 +7,11 @@ class MockType {
     this.type = type;
     this.flag = !!flag;
   }
-  async creationPipeline(payload, dijix) {
+  creationPipeline() {
     return { myType: this.type, myFlag: this.flag };
   }
-  async fetchPipeline(payload, opts, dijix) {
-    // this could do a whole bunch including resolving and fetching
-    return obj;
+  fetchPipeline(payload) {
+    return { ...payload, testTransform: this.flag };
   }
 }
 
@@ -101,10 +99,10 @@ describe('dijix', function () {
         dijixObject = fetchedData.dijixObject;
       });
     });
-    // TODO populates multiple values
     describe('fetch', function () {
       it('fetches the dijix object from the IPFS hash', async function () {
-        assert.deepEqual(await dijix.fetch(createdHash), dijixObject);
+        dijix.registerTypes([new MockType('test')]);
+        assert.deepEqual(await dijix.fetch(createdHash), { ...dijixObject, testTransform: false });
       });
     });
   });
