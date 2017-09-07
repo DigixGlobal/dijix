@@ -24,9 +24,7 @@ export default class Ipfs {
     return res[0].hash;
   }
   put(items) {
-    if (Array.isArray(items)) {
-      return a.map(items, this.concurrency, i => this.add(i));
-    }
+    if (Array.isArray(items)) { return a.map(items, this.concurrency, i => this.add(i)); }
     return this.add(items);
   }
 }

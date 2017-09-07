@@ -2,6 +2,18 @@ import assert from 'assert';
 
 import Dijix, { defaultConfig } from '../src';
 
+class MockPinningMiddleware {
+  constructor(message) {
+    this.message = message;
+  }
+  pin() {
+    return new Promise(resolve => setTimeout(() => resolve(this.message), 20));
+  }
+  async uploaded(payload) {
+    return { ...payload, pinned: await this.pin(payload) };
+  }
+}
+
 class MockType {
   constructor(type, flag) {
     this.type = type;
@@ -10,7 +22,7 @@ class MockType {
   creationPipeline() {
     return { myType: this.type, myFlag: this.flag };
   }
-  fetchPipeline(payload) {
+  readPipeline(payload) {
     return { ...payload, testTransform: this.flag };
   }
 }
@@ -40,28 +52,34 @@ describe('dijix', function () {
     });
   });
   describe('registerTypes', function () {
+    const types = [
+      [new MockType('one'), new MockType('two')],
+      [new MockType('three'), new MockType('four')],
+      [new MockType('one', true), new MockType('two', true)],
+    ];
+    const expected = [
+      { one: { type: 'one', flag: false }, two: { type: 'two', flag: false } },
+      { three: { type: 'three', flag: false }, four: { type: 'four', flag: false } },
+      { one: { type: 'one', flag: true }, two: { type: 'two', flag: true } },
+    ];
     it('throws invalid types', function () {
       assert.throws(() => dijix.registerTypes(), 'does not throw undefined');
       assert.throws(() => dijix.registerTypes('test'), 'does not throw string');
       assert.throws(() => dijix.registerTypes([{ notype: true }]), 'does not throw object without type key');
     });
     it('accepts valid types', function () {
-      const types = [
-        [new MockType('one'), new MockType('two')],
-        [new MockType('three'), new MockType('four')],
-        [new MockType('one', true), new MockType('two', true)],
-      ];
-      const expected = [
-        { one: { type: 'one', flag: false }, two: { type: 'two', flag: false } },
-        { three: { type: 'three', flag: false }, four: { type: 'four', flag: false } },
-        { one: { type: 'one', flag: true }, two: { type: 'two', flag: true } },
-      ];
       dijix.registerTypes(types[0]);
       assert.deepEqual(dijix.types, expected[0], 'initial');
       dijix.registerTypes(types[1]);
       assert.deepEqual(dijix.types, { ...expected[0], ...expected[1] }, 'additional');
       dijix.registerTypes(types[2]);
       assert.deepEqual(dijix.types, { ...expected[0], ...expected[1], ...expected[2] }, 'overrides');
+    });
+    it('accepts valid types (in constrcutor)', function () {
+      dijix = new Dijix({ types: types[0] });
+      assert.deepEqual(dijix.types, expected[0], 'constructor');
+      dijix.registerTypes(types[1]);
+      assert.deepEqual(dijix.types, { ...expected[0], ...expected[1] }, 'additional');
     });
   });
   describe('populateHeaders', function () {
@@ -83,27 +101,35 @@ describe('dijix', function () {
     });
   });
   describe('create & fetch', function () {
-    let createdHash;
     let dijixObject;
     describe('create', function () {
       it('creates the dijixObject and uploads it to ipfs', async function () {
         dijix.registerTypes([new MockType('test')]);
         const before = new Date().getTime();
-        const fetchedData = await dijix.create('test');
-        const { dijixObject: { type, created, schema, data }, ipfsHash } = fetchedData;
+        dijixObject = await dijix.create('test');
+        const { type, created, schema, data, ipfsHash } = dijixObject;
         assert.deepEqual({ type, schema, data }, { type: 'test', schema: '0.0.1', data: { myType: 'test', myFlag: false } });
         const after = new Date().getTime();
         assert.ok(before <= created && after >= created);
         assert.ok(ipfsHash.indexOf('Qm') === 0);
-        createdHash = ipfsHash;
-        dijixObject = fetchedData.dijixObject;
       });
     });
     describe('fetch', function () {
       it('fetches the dijix object from the IPFS hash', async function () {
         dijix.registerTypes([new MockType('test')]);
-        assert.deepEqual(await dijix.fetch(createdHash), { ...dijixObject, testTransform: false });
+        const { ipfsHash, ...rest } = dijixObject;
+        assert.deepEqual(await dijix.fetch(ipfsHash), { ...rest, testTransform: false });
       });
+    });
+  });
+  describe('plugins', function () {
+    it('hooks into global plugins', async function () {
+      dijix = new Dijix({
+        ...defaultConfig,
+        types: [new MockType('test')],
+        plugins: [new MockPinningMiddleware('test message')],
+      });
+      assert.equal((await dijix.create('test')).pinned, 'test message');
     });
   });
 });
