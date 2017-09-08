@@ -4,12 +4,15 @@
   "description": "Digix's IPFS & JSON Immutable & eXtendable File Format Edit",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require babel-polyfill --compilers js:babel-register",
-    "test:watch": "npm run test -- --watch"
+    "test": "npm run test:node && npm run test:browser",
+    "test:node": "mocha --require babel-polyfill --compilers js:babel-register",
+    "test:watch": "npm run test:node -- --watch",
+    "test:browser": "webpack-dev-server --config webpack.mocha.js --open"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel-loader": "^7.1.2",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.5.1",
     "babel-preset-stage-0": "^6.24.1",
@@ -20,7 +23,12 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^5.0.3",
     "eslint-plugin-react": "^7.0.1",
-    "mocha": "^3.5.0"
+    "file-loader": "^0.11.2",
+    "html-webpack-plugin": "^2.30.1",
+    "mocha": "^3.5.0",
+    "mocha-loader": "^1.1.1",
+    "webpack": "^3.5.6",
+    "webpack-dev-server": "^2.7.1"
   },
   "dependencies": {
     "awaiting": "^3.0.0",
