@@ -20,7 +20,7 @@ Dijix consists of:
 
 The entire dijix suite (except for react components) is supported in the browser, node and via a command line interface.
 
-## Dijix Objects
+## Dijix Objects 
 
 Dijix objects are JSON objects (uploaded to IPFS) with the following properties:
 
