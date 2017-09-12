@@ -73,6 +73,7 @@ A middleware system will provide optional functionality when importing and/or re
 ### Node & Browser
 
 ```javascript
+import Dijix from 'dijix';
 import DijixImage from 'dijix-image';
 import DijixPDF from 'dijix-pdf';
 
