@@ -53,7 +53,7 @@ Dijix objects come with standard headers and a type-specific `data` schema. Here
 }
 ```
 
-## Types
+## Dijix Types
 
 * [dijix-image](https://github.com/DigixGlobal/dijix-image)
 * [dijix-pdf](https://github.com/DigixGlobal/dijix-pdf)
