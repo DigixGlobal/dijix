@@ -3,6 +3,8 @@ import 'isomorphic-fetch';
 
 import Ipfs from './ipfs';
 
+const pluginKeys = ['populated', 'created', 'uploaded', 'fetched', 'read', 'ipfsHashAdded'];
+
 const endPoints = typeof window === 'undefined' ? {
   ipfsEndpoint: 'http://localhost:5001',
   httpEndpoint: 'http://localhost:8080/ipfs',
@@ -22,16 +24,18 @@ export default class Dijix {
   }
   setConfig({ plugins, types, ...config } = {}) {
     this.config = { ...(this.config || defaultConfig), ...config };
-    if (config.ipfsEndpoint) { this.ipfs = new Ipfs(this.config); }
+    if ((!this.ipfs && this.config.ipfsEndpoint) || config.ipfsEndpoint) {
+      this.ipfs = new Ipfs(this);
+    }
     if (plugins) { this.registerPlugins(plugins); }
     if (types) { this.registerTypes(types); }
   }
   registerPlugins(plugins) {
     if (!Array.isArray(plugins)) { throw new Error('Plugins must be an array'); }
     if (this.plugins) { throw new Error('Plugins already defined'); }
-    this.plugins = { populated: [], created: [], uploaded: [], fetched: [], read: [] };
-    plugins.forEach(p => Object.keys(this.plugins).forEach((k) => {
-      if (p[k]) { this.plugins[k] = this.plugins[k].concat([(...opts) => p[k](...opts)]); }
+    this.plugins = {};
+    plugins.forEach(p => pluginKeys.forEach((k) => {
+      if (p[k]) { this.plugins[k] = (this.plugins[k] || []).concat([(...opts) => p[k](...opts)]); }
     }));
   }
   registerTypes(types) {
@@ -56,7 +60,7 @@ export default class Dijix {
   async emit(stage, payload = {}) {
     const plugins = this.plugins && this.plugins[stage];
     if (!plugins || plugins.length === 0) { return payload; }
-    return plugins.reduce(async (obj, plugin) => plugin(obj, this), payload);
+    return plugins.reduce(async (obj, plugin) => plugin(obj, this) || obj, payload);
   }
   async create(typeName, payload) {
     if (!this.types) { throw new Error('Not initialized!'); }
