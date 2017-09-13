@@ -3,11 +3,7 @@ import * as a from 'awaiting';
 
 function itemToBuffer(item) {
   if (Buffer.isBuffer(item)) { return item; }
-  if (Array.isArray(item)) { return item; }
-  if (typeof item === 'string') {
-    const type = item.substr(0, 5) === 'data:' ? 'base64' : undefined;
-    return Buffer.from(item, type);
-  }
+  if (typeof item === 'string') { return Buffer.from(item); }
   return Buffer.from(JSON.stringify(item));
 }
 
