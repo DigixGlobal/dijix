@@ -1,6 +1,6 @@
 {
   "name": "dijix",
-  "version": "0.0.3",
+  "version": "0.0.8",
   "description": "Digix's IPFS & JSON Immutable & eXtendable File Format Edit",
   "main": "./src/index.js",
   "bin": {
@@ -16,7 +16,6 @@
   "license": "ISC",
   "devDependencies": {
     "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.0",
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.1",
     "eslint-plugin-import": "^2.2.0",
@@ -32,6 +31,7 @@
   "dependencies": {
     "awaiting": "^3.0.0",
     "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "commander": "^2.11.0",

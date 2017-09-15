@@ -7,6 +7,8 @@ import getInstalledPath from 'get-installed-path';
 
 import Dijix from '../';
 
+import { version } from '../../package.json';
+
 const defaultConfig = `${process.env.HOME}/.dijixrc`;
 
 const autoDetectTypes = ['dijix-image', 'dijix-pdf', 'dijix-attestation'];
@@ -28,7 +30,7 @@ function parseConfig(str) {
 }
 
 program
-  .version('0.0.1')
+  .version(version)
   .usage('create <type> <src>')
   .description('Creates a dijix object of <type> using <src> path and upload it to ipfs')
   .option('-c, --config [string / path]', 'base config file (JSON string or path); defaults to ~/.dijixrc', defaultConfig)
