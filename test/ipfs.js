@@ -1,9 +1,10 @@
 import assert from 'assert';
 
 import Ipfs from '../src/ipfs';
-import { defaultConfig } from '../src';
 
-const ipfs = new Ipfs(defaultConfig);
+import { defaultConfig } from './index';
+
+const ipfs = new Ipfs({ config: defaultConfig, emit: () => { } });
 
 const testItems = [
   [{ hello: true }, { world: 'test' }, 'string'],

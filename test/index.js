@@ -1,6 +1,19 @@
 import assert from 'assert';
 
-import Dijix, { defaultConfig } from '../src';
+import Dijix from '../src';
+
+const endPoints = typeof window === 'undefined' ? {
+  ipfsEndpoint: 'http://localhost:5001',
+  httpEndpoint: 'http://localhost:8080/ipfs',
+} : {
+  ipfsEndpoint: 'https://ipfs.infura.io:5001',
+  httpEndpoint: 'https://ipfs.infura.io/ipfs',
+};
+
+export const defaultConfig = {
+  ...endPoints,
+  concurrency: 10,
+};
 
 class MockPinningMiddleware {
   constructor(message) {

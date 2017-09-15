@@ -13,7 +13,7 @@ const endPoints = typeof window === 'undefined' ? {
   httpEndpoint: 'https://ipfs.infura.io/ipfs',
 };
 
-export const defaultConfig = {
+const defaultConfig = {
   ...endPoints,
   concurrency: 10,
 };
