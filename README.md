@@ -57,7 +57,7 @@ Dijix objects come with standard headers and a type-specific `data` schema. Here
 
 * [dijix-image](https://github.com/DigixGlobal/dijix-image)
 * [dijix-pdf](https://github.com/DigixGlobal/dijix-pdf)
-* dijix-attestation (coming soon; a Proof of Asset attestation object)
+* [dijix-attestation](https://github.com/DigixGlobal/dijix-attestation)
 * dijix-pinning-registry (coming soon; a kovan-connected pinning registry)
 
 ## Middlewares
