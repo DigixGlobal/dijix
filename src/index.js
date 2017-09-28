@@ -76,4 +76,5 @@ export default class Dijix {
     const dijixObject = await this.emit('fetched', json);
     return this.emit('read', await this.readPipeline(dijixObject, opts));
   }
+  // TODO resolve
 }

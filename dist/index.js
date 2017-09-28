@@ -368,6 +368,8 @@ var Dijix = function () {
         return _ref7.apply(this, arguments);
       };
     }())
+    // TODO resolve
+
   }]);
   return Dijix;
 }();
