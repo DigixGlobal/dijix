@@ -23,6 +23,7 @@ export default class Dijix {
     this.setConfig(config);
   }
   setConfig({ plugins, types, ...config } = {}) {
+    this.types = {};
     this.config = { ...(this.config || defaultConfig), ...config };
     if ((!this.ipfs && this.config.ipfsEndpoint) || config.ipfsEndpoint) {
       this.ipfs = new Ipfs(this);
@@ -55,7 +56,7 @@ export default class Dijix {
   }
   async readPipeline(dijixObject, opts) {
     const type = dijixObject.type && this.types[dijixObject.type];
-    return type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject;
+    return type && type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject;
   }
   async emit(stage, payload = {}) {
     const plugins = this.plugins && this.plugins[stage];

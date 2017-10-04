@@ -43,17 +43,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 process.on('unhandledRejection', console.error);
 
-var defaultConfig = process.env.HOME + '/.dijixrc';
+var defaultConfig = process.env.HOME + '/.dijixrc.js';
 
 var autoDetectTypes = ['dijix-image', 'dijix-pdf', 'dijix-attestation'];
-// const autoDetectTypes = ['dijix-image'];
 
 function parseConfig(str) {
   var config = void 0;
   try {
-    // try parsing file content
-    config = _fs2.default.existsSync(str) && JSON.parse(_fs2.default.readFileSync(str).toString());
-  } catch (e) {/* ignore */}
+    config = _fs2.default.existsSync(str) && require(str);
+  } catch (e) {
+    console.log('err', e);
+  }
   if (!config) {
     try {
       // try parsing the string itself
@@ -67,10 +67,6 @@ _commander2.default.version(_package.version).usage('create <type> <src>').descr
   return s.split(',').map(function (npm) {
     return { npm: npm };
   });
-}).option('-p, --plugins [npm_modules]', 'specify plugins to register (comma seperated npm module names)', function (s) {
-  return s.split(',').map(function (p) {
-    return p;
-  });
 }).action(function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(cmd, type, src) {
     var config, options, detectedTypes, typesConfig, types, dijix, obj;
@@ -82,9 +78,10 @@ _commander2.default.version(_package.version).usage('create <type> <src>').descr
             config = parseConfig(_commander2.default.config);
             options = parseConfig(_commander2.default.options);
 
-            // auto-detect types
+            console.log("got", { config: config, options: options });
 
-            _context3.next = 4;
+            // auto-detect types
+            _context3.next = 5;
             return _promise2.default.all(autoDetectTypes.map(function () {
               var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(module) {
                 return _regenerator2.default.wrap(function _callee$(_context) {
@@ -119,7 +116,7 @@ _commander2.default.version(_package.version).usage('create <type> <src>').descr
               };
             }()));
 
-          case 4:
+          case 5:
             _context3.t0 = function (a) {
               return a;
             };
@@ -130,14 +127,14 @@ _commander2.default.version(_package.version).usage('create <type> <src>').descr
             typesConfig = detectedTypes.concat((config.types || []).concat(_commander2.default.types || []));
 
             if (!(typesConfig.length === 0 && detectedTypes.length === 0)) {
-              _context3.next = 9;
+              _context3.next = 10;
               break;
             }
 
             throw new Error('No dijix types set. Use -t, specify in config file, or npm i -g ' + autoDetectTypes.join(' ') + '.');
 
-          case 9:
-            _context3.next = 11;
+          case 10:
+            _context3.next = 12;
             return _promise2.default.all(typesConfig.map(function () {
               var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4) {
                 var npm = _ref4.npm,
@@ -187,20 +184,18 @@ _commander2.default.version(_package.version).usage('create <type> <src>').descr
               };
             }()));
 
-          case 11:
+          case 12:
             types = _context3.sent;
-
-            // TODO register plugins...
             dijix = new _2.default((0, _extends3.default)({}, config, { types: types }));
-            _context3.next = 15;
+            _context3.next = 16;
             return dijix.create(type, (0, _extends3.default)({ src: src }, options));
 
-          case 15:
+          case 16:
             obj = _context3.sent;
 
             process.stdout.write((0, _stringify2.default)(obj, null, 2));
 
-          case 17:
+          case 18:
           case 'end':
             return _context3.stop();
         }

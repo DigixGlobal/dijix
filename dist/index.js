@@ -71,6 +71,7 @@ var Dijix = function () {
           types = _ref.types,
           config = (0, _objectWithoutProperties3.default)(_ref, ['plugins', 'types']);
 
+      this.types = {};
       this.config = (0, _extends4.default)({}, this.config || defaultConfig, config);
       if (!this.ipfs && this.config.ipfsEndpoint || config.ipfsEndpoint) {
         this.ipfs = new _ipfs2.default(this);
@@ -162,7 +163,7 @@ var Dijix = function () {
             switch (_context2.prev = _context2.next) {
               case 0:
                 type = dijixObject.type && this.types[dijixObject.type];
-                return _context2.abrupt('return', type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject);
+                return _context2.abrupt('return', type && type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject);
 
               case 2:
               case 'end':

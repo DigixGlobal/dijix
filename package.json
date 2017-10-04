@@ -1,6 +1,6 @@
 {
   "name": "dijix",
-  "version": "0.0.11",
+  "version": "0.0.14",
   "description": "Digix's IPFS & JSON Immutable & eXtendable File Format Edit",
   "main": "./dist/index.js",
   "bin": {

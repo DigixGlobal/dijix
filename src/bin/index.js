@@ -10,17 +10,15 @@ import { version } from '../../package.json';
 
 process.on('unhandledRejection', console.error);
 
-const defaultConfig = `${process.env.HOME}/.dijixrc`;
+const defaultConfig = `${process.env.HOME}/.dijixrc.js`;
 
 const autoDetectTypes = ['dijix-image', 'dijix-pdf', 'dijix-attestation'];
-// const autoDetectTypes = ['dijix-image'];
 
 function parseConfig(str) {
   let config;
   try {
-    // try parsing file content
-    config = fs.existsSync(str) && JSON.parse(fs.readFileSync(str).toString());
-  } catch (e) { /* ignore */ }
+    config = fs.existsSync(str) && require(str);
+  } catch (e) { console.log('err', e); }
   if (!config) {
     try {
       // try parsing the string itself
@@ -39,13 +37,11 @@ program
   .option('-t, --types [npm_modules]', 'specify types to register (comma seperated npm module names)', s => (
     s.split(',').map(npm => ({ npm }))
   ))
-  .option('-p, --plugins [npm_modules]', 'specify plugins to register (comma seperated npm module names)', s => (
-    s.split(',').map(p => p)
-  ))
   .action(async (cmd, type, src) => {
     // parse the options
     const config = parseConfig(program.config);
     const options = parseConfig(program.options);
+    console.log("got", { config, options });
 
     // auto-detect types
     const detectedTypes = (
@@ -73,7 +69,6 @@ program
         throw new Error(`Could not find path: ${npm || path} - ${e}`);
       }
     }));
-    // TODO register plugins...
     const dijix = new Dijix({ ...config, types });
     const obj = await dijix.create(type, { src, ...options });
     process.stdout.write(JSON.stringify(obj, null, 2));
