@@ -58,12 +58,12 @@ Dijix objects come with standard headers and a type-specific `data` schema. Here
 * [dijix-image](https://github.com/DigixGlobal/dijix-image)
 * [dijix-pdf](https://github.com/DigixGlobal/dijix-pdf)
 * [dijix-attestation](https://github.com/DigixGlobal/dijix-attestation)
-* dijix-pinning-registry (coming soon; a kovan-connected pinning registry)
 
 ## Middlewares
 
 A middleware system will provide optional functionality when importing and/or reading dijix objects:
 
+* [dijix-plugin-pinning](https://github.com/DigixGlobal/dijix-plugin-pinning) (and [pinning srever](https://github.com/DigixGlobal/node-ipfs-pinning-server-lite))
 * Encryption & Decryption (TODO)
 * IPFS Pinning / Unpinning (TODO)
 * Local & Cloud Backups (TODO)
@@ -80,6 +80,7 @@ import DijixPDF from 'dijix-pdf';
 const dijix = new Dijix({
   ipfsEndpoint: 'https://ipfs.infura.io:5001', // optional
   httpEndpoint: 'https://ipfs.infura.io/ipfs', // optional
+  cache: true, // optional in-memory dijix object cache, defaults to true
   concurrency: 10, // optional
   types: [
     new DijixImage(),

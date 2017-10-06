@@ -16,14 +16,16 @@ const endPoints = typeof window === 'undefined' ? {
 const defaultConfig = {
   ...endPoints,
   concurrency: 10,
+  cache: true,
 };
 
 export default class Dijix {
   constructor(config) {
+    this.types = {};
+    this.cache = {};
     this.setConfig(config);
   }
   setConfig({ plugins, types, ...config } = {}) {
-    this.types = {};
     this.config = { ...(this.config || defaultConfig), ...config };
     if ((!this.ipfs && this.config.ipfsEndpoint) || config.ipfsEndpoint) {
       this.ipfs = new Ipfs(this);
@@ -69,13 +71,21 @@ export default class Dijix {
     if (!type) { throw new Error(`Type does not exist: ${typeName}`); }
     let dijixObject = await this.emit('populated', this.populateHeaders(typeName));
     dijixObject = await this.emit('created', { ...dijixObject, data: await this.creationPipeline(payload, type) });
+    // TODO options to embed it...
     return this.emit('uploaded', { ...dijixObject, ipfsHash: await this.ipfs.put(dijixObject) });
   }
   async fetch(ipfsHash, opts) {
-    const body = await fetch(`${this.config.httpEndpoint}/${ipfsHash}`);
-    const json = await body.json();
-    const dijixObject = await this.emit('fetched', json);
+    let dijixObject = this.config.cache && this.cache[ipfsHash];
+    if (!dijixObject) {
+      const body = await fetch(`${this.config.httpEndpoint}/${ipfsHash}`);
+      const json = await body.json();
+      // TODO resolve links...
+      dijixObject = await this.emit('fetched', json);
+    }
+    // cache it (if not cached)...
+    if (this.config.cache && !this.cache[ipfsHash]) {
+      this.cache[ipfsHash] = dijixObject;
+    }
     return this.emit('read', await this.readPipeline(dijixObject, opts));
   }
-  // TODO resolve
 }

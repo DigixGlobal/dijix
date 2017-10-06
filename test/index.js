@@ -13,6 +13,7 @@ const endPoints = typeof window === 'undefined' ? {
 export const defaultConfig = {
   ...endPoints,
   concurrency: 10,
+  cache: true,
 };
 
 class MockPinningMiddleware {
@@ -41,8 +42,9 @@ class MockType {
 }
 
 describe('dijix', function () {
+  this.timeout(5000);
   let dijix;
-  beforeEach(() => { dijix = new Dijix(defaultConfig); });
+  beforeEach(() => { dijix = new Dijix(); });
   describe('initialization', function () {
     it('sets the default config', function () {
       dijix = new Dijix();
@@ -134,11 +136,29 @@ describe('dijix', function () {
         assert.deepEqual(await dijix.fetch(ipfsHash), { ...rest, testTransform: false });
       });
     });
+    describe('caching', function () {
+      it('caches the response by default', async function () {
+        dijix.registerTypes([new MockType('test')]);
+        const { ipfsHash, ...obj } = await dijix.create('test');
+        await dijix.fetch(ipfsHash);
+        assert.deepEqual(dijix.cache[ipfsHash], obj, 'it gets cached');
+        dijix.cache[ipfsHash].testCache = true;
+        assert.equal((await dijix.fetch(ipfsHash)).testCache, true, 'returns the cached version');
+      });
+      it('does not cache the response when caching disabled', async function () {
+        dijix = new Dijix({ cache: false });
+        dijix.registerTypes([new MockType('test')]);
+        const { ipfsHash } = await dijix.create('test');
+        await dijix.fetch(ipfsHash);
+        assert.equal(dijix.cache[ipfsHash], undefined, 'it does not get cached');
+        dijix.cache[ipfsHash] = { testCache: true };
+        assert.equal((await dijix.fetch(ipfsHash)).testCache, undefined, 'does not return the cache');
+      });
+    });
   });
   describe('plugins', function () {
     it('hooks into global plugins', async function () {
       dijix = new Dijix({
-        ...defaultConfig,
         types: [new MockType('test')],
         plugins: [new MockPinningMiddleware('test message')],
       });
