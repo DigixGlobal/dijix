@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -53,7 +57,8 @@ var endPoints = typeof window === 'undefined' ? {
 
 var defaultConfig = (0, _extends4.default)({}, endPoints, {
   concurrency: 10,
-  cache: true
+  cache: true,
+  requestTimeout: 1000
 });
 
 var Dijix = function () {
@@ -164,10 +169,18 @@ var Dijix = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                if (!(dijixObject === null || dijixObject === undefined)) {
+                  _context2.next = 2;
+                  break;
+                }
+
+                return _context2.abrupt('return', dijixObject);
+
+              case 2:
                 type = dijixObject.type && this.types[dijixObject.type];
                 return _context2.abrupt('return', type && type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject);
 
-              case 2:
+              case 4:
               case 'end':
                 return _context2.stop();
             }
@@ -318,6 +331,100 @@ var Dijix = function () {
       return create;
     }()
   }, {
+    key: 'timeoutPromise',
+    value: function timeoutPromise(promise) {
+      var _this3 = this;
+
+      return new _promise2.default(function (resolve, reject) {
+        var timeoutId = setTimeout(function () {
+          reject(new Error('promise timeout'));
+        }, _this3.config.requestTimeout);
+        promise.then(function (res) {
+          clearTimeout(timeoutId);
+          resolve(res);
+        }, function (err) {
+          clearTimeout(timeoutId);
+          reject(err);
+        });
+      });
+    }
+  }, {
+    key: 'failSafeFetch',
+    value: function () {
+      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ipfsHash, opts) {
+        var dijixObject, body, json;
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                dijixObject = this.config.cache && this.cache[ipfsHash];
+
+                if (dijixObject) {
+                  _context6.next = 19;
+                  break;
+                }
+
+                _context6.prev = 2;
+                _context6.next = 5;
+                return this.timeoutPromise(fetch(this.config.httpEndpoint + '/' + ipfsHash));
+
+              case 5:
+                body = _context6.sent;
+
+                if (!(body.status >= 200 && body.status < 300)) {
+                  _context6.next = 14;
+                  break;
+                }
+
+                _context6.next = 9;
+                return body.json();
+
+              case 9:
+                json = _context6.sent;
+                _context6.next = 12;
+                return this.emit('fetched', json);
+
+              case 12:
+                dijixObject = _context6.sent;
+
+                if (this.config.cache && !this.cache[ipfsHash]) {
+                  this.cache[ipfsHash] = dijixObject;
+                }
+
+              case 14:
+                _context6.next = 19;
+                break;
+
+              case 16:
+                _context6.prev = 16;
+                _context6.t0 = _context6['catch'](2);
+
+                console.error(_context6.t0);
+
+              case 19:
+                _context6.t1 = this;
+                _context6.next = 22;
+                return this.readPipeline(dijixObject, opts);
+
+              case 22:
+                _context6.t2 = _context6.sent;
+                return _context6.abrupt('return', _context6.t1.emit.call(_context6.t1, 'read', _context6.t2));
+
+              case 24:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this, [[2, 16]]);
+      }));
+
+      function failSafeFetch(_x14, _x15) {
+        return _ref7.apply(this, arguments);
+      }
+
+      return failSafeFetch;
+    }()
+  }, {
     key: 'fetch',
     value: function (_fetch) {
       function fetch(_x, _x2) {
@@ -330,58 +437,58 @@ var Dijix = function () {
 
       return fetch;
     }(function () {
-      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ipfsHash, opts) {
+      var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(ipfsHash, opts) {
         var dijixObject, body, json;
-        return _regenerator2.default.wrap(function _callee6$(_context6) {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 dijixObject = this.config.cache && this.cache[ipfsHash];
 
                 if (dijixObject) {
-                  _context6.next = 11;
+                  _context7.next = 11;
                   break;
                 }
 
-                _context6.next = 4;
+                _context7.next = 4;
                 return fetch(this.config.httpEndpoint + '/' + ipfsHash);
 
               case 4:
-                body = _context6.sent;
-                _context6.next = 7;
+                body = _context7.sent;
+                _context7.next = 7;
                 return body.json();
 
               case 7:
-                json = _context6.sent;
-                _context6.next = 10;
+                json = _context7.sent;
+                _context7.next = 10;
                 return this.emit('fetched', json);
 
               case 10:
-                dijixObject = _context6.sent;
+                dijixObject = _context7.sent;
 
               case 11:
                 // cache it (if not cached)...
                 if (this.config.cache && !this.cache[ipfsHash]) {
                   this.cache[ipfsHash] = dijixObject;
                 }
-                _context6.t0 = this;
-                _context6.next = 15;
+                _context7.t0 = this;
+                _context7.next = 15;
                 return this.readPipeline(dijixObject, opts);
 
               case 15:
-                _context6.t1 = _context6.sent;
-                return _context6.abrupt('return', _context6.t0.emit.call(_context6.t0, 'read', _context6.t1));
+                _context7.t1 = _context7.sent;
+                return _context7.abrupt('return', _context7.t0.emit.call(_context7.t0, 'read', _context7.t1));
 
               case 17:
               case 'end':
-                return _context6.stop();
+                return _context7.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee7, this);
       }));
 
-      return function (_x14, _x15) {
-        return _ref7.apply(this, arguments);
+      return function (_x16, _x17) {
+        return _ref8.apply(this, arguments);
       };
     }())
   }]);
