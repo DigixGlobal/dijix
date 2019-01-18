@@ -72,6 +72,8 @@ A middleware system will provide optional functionality when importing and/or re
 
 ### Node & Browser
 
+##### Upload
+
 ```javascript
 import Dijix from 'dijix';
 import DijixImage from 'dijix-image';
@@ -82,6 +84,7 @@ const dijix = new Dijix({
   httpEndpoint: 'https://ipfs.infura.io/ipfs', // optional
   cache: true, // optional in-memory dijix object cache, defaults to true
   concurrency: 10, // optional
+  requestTimeout: 1000, //optional
   types: [
     new DijixImage(),
     new DijixPDF(),
@@ -90,6 +93,14 @@ const dijix = new Dijix({
 
 await dijix.create('image', { src: '/some/image.jpg', ...config }); // outputs dijix object
 await dijix.create('pdf', { src: '/some/pdf.pdf', ...config }); // outputs dijix object
+```
+
+##### Fetch
+
+```javascript
+// This returns the document if found within `requestTimeout` milliseconds
+// otherwise logs the error
+await dijix.failSafeFetch(ipfsHash);
 ```
 
 For node and CLI, you'll need npm, node 8+ and cairo / libpng. See [dijix-image](https://github.com/DigixGlobal/dijix-image) for instructions.

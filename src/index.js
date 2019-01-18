@@ -17,6 +17,7 @@ const defaultConfig = {
   ...endPoints,
   concurrency: 10,
   cache: true,
+  requestTimeout: 1000,
 };
 
 export default class Dijix {
@@ -57,6 +58,7 @@ export default class Dijix {
     return type.creationPipeline ? type.creationPipeline(payload, this) : {};
   }
   async readPipeline(dijixObject, opts) {
+    if (dijixObject === null || dijixObject === undefined) return dijixObject;
     const type = dijixObject.type && this.types[dijixObject.type];
     return type && type.readPipeline ? type.readPipeline(dijixObject, this, opts) : dijixObject;
   }
@@ -73,6 +75,41 @@ export default class Dijix {
     dijixObject = await this.emit('created', { ...dijixObject, data: await this.creationPipeline(payload, type) });
     // TODO options to embed it...
     return this.emit('uploaded', { ...dijixObject, ipfsHash: await this.ipfs.put(dijixObject) });
+  }
+  timeoutPromise(promise) {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('promise timeout'));
+      }, this.config.requestTimeout);
+      promise.then(
+        (res) => {
+          clearTimeout(timeoutId);
+          resolve(res);
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          reject(err);
+        },
+      );
+    });
+  }
+  async failSafeFetch(ipfsHash, opts) {
+    let dijixObject = this.config.cache && this.cache[ipfsHash];
+    if (!dijixObject) {
+      try {
+        const body = await this.timeoutPromise(fetch(`${this.config.httpEndpoint}/${ipfsHash}`));
+        if (body.status >= 200 && body.status < 300) {
+          const json = await body.json();
+          dijixObject = await this.emit('fetched', json);
+          if (this.config.cache && !this.cache[ipfsHash]) {
+            this.cache[ipfsHash] = dijixObject;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return this.emit('read', await this.readPipeline(dijixObject, opts));
   }
   async fetch(ipfsHash, opts) {
     let dijixObject = this.config.cache && this.cache[ipfsHash];
